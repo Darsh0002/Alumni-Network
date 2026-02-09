@@ -27,10 +27,7 @@ import {
   DollarSign,
   GraduationCap,
 } from "lucide-react";
-import SuccessStories from "./SuccessStories";
-import Chatbot from "./Chatbot";
 import { Link } from "react-router-dom";
-import Navbar from "./Navbar"; // 👈 New import
 
 export default function AlumniPlatform() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -462,7 +459,7 @@ export default function AlumniPlatform() {
         </div>
       </section>
 
-      <SuccessStories />
+      {/* <SuccessStories /> */}
 
       {/* Testimonials */}
       <section id="testimonials" className="py-20 bg-slate-50">

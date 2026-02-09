@@ -11,7 +11,7 @@ async function loadTodos() {
     const li = document.createElement("li");
     li.innerHTML = `
       ${todo.text}
-      <button onclick="deleteTodo(${todo.id})">❌</button>
+      <button onclick="deleteTodo(${todo.id})">Delete</button>
     `;
     list.appendChild(li);
   });

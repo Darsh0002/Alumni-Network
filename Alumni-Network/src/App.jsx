@@ -1,17 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import AlumniPlatform from "./pages/AlumniPlatform";
-import Dashboard from "./pages/Dashboard";
-import Navbar from "./pages/Navbar";
-import LoginPage from "./pages/LoginPage.jsx";
-import AlumniDirectory from "./pages/AlumniDirectory.jsx";
-import RegisterInstitute from "./pages/RegisterInstitute.jsx";
-import Mentorship from "./pages/Mentorship.jsx";
-import Jobs from "./pages/Jobs.jsx";
-import Scholarships from "./pages/Scholarships.jsx";
-import Posts from "./pages/Posts.jsx";
-import Donate from "./pages/Donate.jsx";
-import Events from "./pages/Events.jsx";
 
 const App = () => {
   return (
@@ -22,12 +11,12 @@ const App = () => {
           path="/"
           element={
             <>
-              <Navbar />
+              {/* <Navbar /> */}
               <AlumniPlatform />
             </>
           }
         />
-        <Route
+        {/* <Route
           path="/dashboard"
           element={
             <>
@@ -62,10 +51,10 @@ const App = () => {
               <RegisterInstitute />
             </>
           }
-        />
+        /> */}
 
         {/* New pages */}
-        <Route
+        {/* <Route
           path="/mentorship"
           element={
             <>
@@ -118,7 +107,7 @@ const App = () => {
               <Events />
             </>
           }
-        />
+        /> */}
 
         {/* Catch-all for 404 */}
         <Route

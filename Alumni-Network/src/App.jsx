@@ -1,7 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import AlumniPlatform from "./pages/AlumniPlatform";
-import LoginPage from "./pages/LoginPage.jsx";
+import LoginPage from "./pages/LoginPage";
 import Navbar from "./components/Navbar";
 
 const App = () => {
@@ -13,20 +13,20 @@ const App = () => {
           path="/"
           element={
             <>
-              {/* <Navbar /> */}
+              <Navbar /> 
               <AlumniPlatform />
             </>
           }
         />
-        {/* <Route
-          path="/dashboard"
-          element={
-            <>
-              <Navbar />
-              <Dashboard />
-            </>
-          }
-        />
+       {/*<Route*/}
+       {/*   path="/dashboard"*/}
+       {/*   element={*/}
+       {/*     <>*/}
+       {/*       <Navbar />*/}
+       {/*       <Dashboard />*/}
+       {/*     </>*/}
+       {/*   }*/}
+       {/* />*/}
         <Route
           path="/login"
           element={
@@ -36,24 +36,24 @@ const App = () => {
             </>
           }
         />
-        <Route
-          path="/alumni-directory"
-          element={
-            <>
-              <Navbar />
-              <AlumniDirectory />
-            </>
-          }
-        />
-        <Route
-          path="/register-institute"
-          element={
-            <>
-              <Navbar />
-              <RegisterInstitute />
-            </>
-          }
-        /> */}
+        {/*<Route*/}
+        {/*  path="/alumni-directory"*/}
+        {/*  element={*/}
+        {/*    <>*/}
+        {/*      <Navbar />*/}
+        {/*      <AlumniDirectory />*/}
+        {/*    </>*/}
+        {/*  }*/}
+        {/*/>*/}
+        {/*<Route*/}
+        {/*  path="/register-institute"*/}
+        {/*  element={*/}
+        {/*    <>*/}
+        {/*      <Navbar />*/}
+        {/*      <RegisterInstitute />*/}
+        {/*    </>*/}
+        {/*  }*/}
+        {/*/> */}
 
         {/* New pages */}
         {/* <Route

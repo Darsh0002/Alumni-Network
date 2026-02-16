@@ -5,6 +5,7 @@ import Navbar from "./components/Navbar";
 import LandingPage from "./pages/LandingPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
+import RegisterInstitute from "./pages/RegisterInstitute";
 
 const App = () => {
   return (
@@ -41,8 +42,15 @@ const App = () => {
           path="/login"
           element={
             <>
-              <Navbar />
               <LoginPage />
+            </>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <>
+              <RegisterInstitute/>
             </>
           }
         />
@@ -55,15 +63,7 @@ const App = () => {
         {/*    </>*/}
         {/*  }*/}
         {/*/>*/}
-        {/*<Route*/}
-        {/*  path="/register-institute"*/}
-        {/*  element={*/}
-        {/*    <>*/}
-        {/*      <Navbar />*/}
-        {/*      <RegisterInstitute />*/}
-        {/*    </>*/}
-        {/*  }*/}
-        {/*/> */}
+        
 
         {/* New pages */}
         {/* 

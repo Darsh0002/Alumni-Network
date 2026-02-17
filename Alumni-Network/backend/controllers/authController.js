@@ -1,7 +1,6 @@
 const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 const Institute = require("../models/Institute");
-const crypto = require("crypto");
 
 const register = async (req, res) => {
   try {
@@ -53,11 +52,12 @@ const registerInstitute = async (req, res) => {
       address,
       city,
       state,
-      pincode,
       website,
+      password,
+      confirmPassword,
     } = req.body;
 
-    // basic validation
+    // validation
     if (
       !instituteName ||
       !email ||
@@ -65,23 +65,25 @@ const registerInstitute = async (req, res) => {
       !address ||
       !city ||
       !state ||
-      !pincode
+      !password ||
+      !confirmPassword
     ) {
-      return res.status(400).json({ message: "All required fields missing" });
+      return res.status(400).json({ message: "All fields are required" });
     }
 
-    // check if admin user already exists
+    if (password !== confirmPassword) {
+      return res.status(400).json({ message: "Passwords do not match" });
+    }
+
+    // check if admin already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "Institute already registered" });
     }
 
-    // generate temporary password
-    const tempPassword = crypto.randomBytes(4).toString("hex");
-
     // hash password
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(tempPassword, salt);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
     // create admin user
     const adminUser = await User.create({
@@ -98,7 +100,6 @@ const registerInstitute = async (req, res) => {
       address,
       city,
       state,
-      pincode,
       website,
       adminUser: adminUser._id,
     });
@@ -106,10 +107,6 @@ const registerInstitute = async (req, res) => {
     res.status(201).json({
       success: true,
       message: "Institute registered successfully",
-      adminLogin: {
-        email,
-        temporaryPassword: tempPassword,
-      },
       instituteId: institute._id,
     });
   } catch (error) {
@@ -117,7 +114,6 @@ const registerInstitute = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
 
 const login = async (req, res) => {
   const { email, password } = req.body;

@@ -1132,7 +1132,7 @@ const AdminDashboard = () => {
           ))}
         </nav>
         <footer className="mt-auto py-6">
-          <p className="text-sm text-gray-500">&copy; 2025 Alumni Network</p>
+          <p className="text-sm text-gray-500">&copy; 2026 Alumni Network</p>
         </footer>
       </aside>
 

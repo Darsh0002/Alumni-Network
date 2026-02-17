@@ -61,9 +61,7 @@ const RegisterInstitute = () => {
 
       setSuccess(true);
 
-      alert(
-        `Institute registered successfully!\n\nAdmin Email: ${data.adminLogin.email}\nTemporary Password: ${data.adminLogin.temporaryPassword}\n\nPlease save these credentials.`,
-      );
+      alert("Institute registered successfully! You can now login as admin.");
 
       navigate("/login");
     } catch (error) {

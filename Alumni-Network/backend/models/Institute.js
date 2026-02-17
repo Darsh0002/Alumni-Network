@@ -27,10 +27,6 @@ const instituteSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    pincode: {
-      type: String,
-      required: true,
-    },
     website: {
       type: String,
     },

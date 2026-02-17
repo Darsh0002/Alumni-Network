@@ -661,7 +661,7 @@ export default function LandingPage() {
             <div className="flex flex-col md:flex-row justify-between items-center">
               <div className="flex items-center space-x-6 mb-4 md:mb-0">
                 <p className="text-slate-400 text-sm">
-                  &copy; 2025 AlumNet. All rights reserved.
+                  &copy; 2026 AlumNet. All rights reserved.
                 </p>
               </div>
             </div>

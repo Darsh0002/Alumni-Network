@@ -1,5 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Toaster } from 'react-hot-toast';
 import LoginPage from "./pages/LoginPage";
 import Navbar from "./components/Navbar";
 import LandingPage from "./pages/LandingPage";
@@ -125,6 +126,7 @@ const App = () => {
           }
         />
       </Routes>
+      <Toaster />
     </Router>
   );
 };

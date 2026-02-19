@@ -1,7 +1,8 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
+import axios from "axios";
+import toast from "react-hot-toast";
+import { FaFileExcel } from "react-icons/fa";
 
-// --- DUMMY DATA ---
-// In a real application, this would come from an API
 export const events = [
   {
     id: 1,
@@ -276,6 +277,7 @@ import {
   FaEdit,
   FaBars,
   FaTimes,
+  FaSpinner,
 } from "react-icons/fa";
 import {
   Pie,
@@ -299,6 +301,50 @@ const AdminDashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const [file, setFile] = useState(null);
+  const fileInputRef = useRef(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const uploadFile = async () => {
+    if (!file) {
+      toast.error("Please select a file to upload.");
+      return;
+    }
+
+    const allowedTypes = [
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/vnd.ms-excel",
+    ];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Please select a valid Excel file (.xlsx or .xls).");
+      return;
+    }
+
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      toast.error("File size must be less than 10MB.");
+      return;
+    }
+
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      await axios.post("http://localhost:5000/upload-excel", formData);
+      toast.success("Excel file uploaded successfully!");
+      setFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = null;
+      }
+    } catch (error) {
+      toast.error("Failed to upload file. Please try again.");
+      console.error("Upload error:", error);
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const [notifications, setNotifications] = useState([
     {
@@ -420,7 +466,7 @@ const AdminDashboard = () => {
 
   const filteredEvents = useMemo(() => {
     return events.filter((event) =>
-      event.name.toLowerCase().includes(searchTerm.toLowerCase())
+      event.name.toLowerCase().includes(searchTerm.toLowerCase()),
     );
   }, [searchTerm]);
 
@@ -519,7 +565,8 @@ const AdminDashboard = () => {
               <div className="bg-white shadow-xl rounded-2xl p-4 sm:p-6">
                 <h2 className="text-lg font-bold mb-4 text-teal-700 flex items-center gap-2">
                   {" "}
-                  <FaTrophy className="text-teal-400" /> Graduation Year Trends{" "}
+                  <FaTrophy className="text-teal-400" /> Graduation Year
+                  Trends{" "}
                 </h2>
                 <ResponsiveContainer width="100%" height={260}>
                   <LineChart data={graduationTrends}>
@@ -554,7 +601,8 @@ const AdminDashboard = () => {
               <div className="bg-white shadow-xl rounded-2xl p-4 sm:p-6">
                 <h2 className="text-lg font-bold mb-4 text-rose-700 flex items-center gap-2">
                   {" "}
-                  <FaDonate className="text-rose-400" /> Funds Donated by Alumni{" "}
+                  <FaDonate className="text-rose-400" /> Funds Donated by
+                  Alumni{" "}
                 </h2>
                 <ResponsiveContainer width="100%" height={260}>
                   <LineChart data={donationData}>
@@ -814,12 +862,51 @@ const AdminDashboard = () => {
                   Browse and manage your alumni network
                 </p>
               </div>
-              <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                <button className="bg-emerald-500 text-white px-5 py-2.5 rounded-lg hover:bg-emerald-600 flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow">
-                  <FaDownload className="text-emerald-100" /> Export Excel
-                </button>
-                <button className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2.5 rounded-lg hover:from-blue-700 hover:to-indigo-700 flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow">
-                  <FaUpload className="text-blue-100" /> Add Alumni
+              <div className="flex flex-col sm:flex-row items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                <div className="relative flex-1 w-full sm:w-auto">
+                  {/* Hidden Actual Input */}
+                  <input
+                    type="file"
+                    id="excel-upload"
+                    accept=".xlsx,.xls"
+                    className="hidden"
+                    ref={fileInputRef}
+                    onChange={(e) => setFile(e.target.files[0])}
+                  />
+
+                  {/* Styled Custom Label */}
+                  <label
+                    htmlFor="excel-upload"
+                    className="flex items-center justify-between w-full px-4 py-2.5 bg-white border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all group"
+                  >
+                    <div className="flex items-center gap-2">
+                      <FaFileExcel className="text-gray-400 group-hover:text-blue-500" />
+                      <span className="text-sm text-gray-600 truncate max-w-[150px]">
+                        {file ? file.name : "Select Excel file"}
+                      </span>
+                    </div>
+                    <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                      Browse
+                    </span>
+                  </label>
+                </div>
+
+                <button
+                  onClick={uploadFile}
+                  disabled={!file || isUploading}
+                  className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 disabled:from-gray-400 disabled:to-gray-500 text-white px-6 py-2.5 rounded-lg hover:from-blue-700 hover:to-indigo-700 flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 disabled:cursor-not-allowed"
+                >
+                  {isUploading ? (
+                    <>
+                      <FaSpinner className="text-blue-100 animate-spin" />
+                      <span>Uploading...</span>
+                    </>
+                  ) : (
+                    <>
+                      <FaUpload className="text-blue-100" />
+                      <span>Upload Data</span>
+                    </>
+                  )}
                 </button>
               </div>
             </div>
@@ -999,7 +1086,7 @@ const AdminDashboard = () => {
                 <button
                   onClick={() => {
                     setNotifications((prev) =>
-                      prev.map((n) => ({ ...n, status: "read" }))
+                      prev.map((n) => ({ ...n, status: "read" })),
                     );
                   }}
                   className="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors mt-2 sm:mt-0"
@@ -1072,8 +1159,8 @@ const AdminDashboard = () => {
                         onClick={() => {
                           setNotifications((prev) =>
                             prev.map((n) =>
-                              n.id === note.id ? { ...n, status: "read" } : n
-                            )
+                              n.id === note.id ? { ...n, status: "read" } : n,
+                            ),
                           );
                         }}
                         className="text-xs self-start sm:self-center font-medium px-3 py-1 rounded-full bg-indigo-100 text-indigo-600 hover:bg-indigo-200 transition-colors flex-shrink-0"
@@ -1114,7 +1201,11 @@ const AdminDashboard = () => {
         <nav className="flex flex-col flex-grow space-y-3">
           {[
             { id: "analytics", label: "Analytics", icon: <FaChartPie /> },
-            { id: "Alumni Directory", label: "Alumni Directory", icon: <FaUsers /> },
+            {
+              id: "Alumni Directory",
+              label: "Alumni Directory",
+              icon: <FaUsers />,
+            },
             { id: "events", label: "Events", icon: <FaCalendarAlt /> },
             { id: "notifications", label: "Notifications", icon: <FaBell /> },
           ].map(({ id, label, icon }) => (
@@ -1152,7 +1243,9 @@ const AdminDashboard = () => {
         </header>
 
         {/* Main content area */}
-        <main className="flex-1 mt-12 overflow-auto">{renderMainDashboard()}</main>
+        <main className="flex-1 mt-12 overflow-auto">
+          {renderMainDashboard()}
+        </main>
       </div>
     </div>
   );

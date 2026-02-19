@@ -22,6 +22,9 @@ const authRoutes = require("./routes/authRoutes");
 app.use("/api/auth", authRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 
+const uploadRoutes = require("./routes/uploadExcel");
+app.use("/", uploadRoutes);
+
 app.get("/", (req, res) => {
   res.send("Backend running with DB");
 });

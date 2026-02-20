@@ -31,15 +31,7 @@ router.get("/students", protect, async (req, res) => {
       instituteId: institute._id,
     }).select("-password"); // 🔒 never send password
 
-    // Derive alumni/current dynamically
-    const currentYear = new Date().getFullYear();
-
     const formattedStudents = students.map((student) => {
-      const status =
-        student.passoutYear && student.passoutYear <= currentYear
-          ? "alumni"
-          : "current";
-
       return {
         id: student._id,
         full_name: student.full_name,
@@ -51,8 +43,7 @@ router.get("/students", protect, async (req, res) => {
         passoutYear: student.passoutYear,
         company: student.company,
         job: student.job,
-        linkedinuri: student.linkedinuri,
-        createdAt: student.createdAt,
+        linkedinuri: student.linkedinuri
       };
     });
 

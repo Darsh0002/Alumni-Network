@@ -108,8 +108,7 @@ router.post("/upload-excel", protect, upload.single("file"), async (req, res) =>
             message: "Excel upload completed",
             inserted: insertedCount,
             skipped: skippedCount,
-            total: rows.length,
-            passwordRule: "Password = Enrollment Number",
+            total: rows.length
         });
     } catch (error) {
         console.error(error);

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { FaFileExcel } from "react-icons/fa";
@@ -114,144 +114,6 @@ export const events = [
   },
 ];
 
-export const alumni = [
-  {
-    id: 1,
-    name: "Daksh Titarmare",
-    email: "devdakshtit@gmail.com",
-    degree: "B.Tech",
-    department: "Computer Science",
-    graduationYear: 2028,
-    enrollmentNumber: "2213063",
-  },
-  {
-    id: 2,
-    name: "DS Mahato",
-    email: "ds.mahato@email.com",
-    degree: "M.Tech",
-    department: "Electrical",
-    graduationYear: 2024,
-    enrollmentNumber: "2213011",
-  },
-  {
-    id: 3,
-    name: "New User",
-    email: "new.user@email.com",
-    degree: "B.Tech",
-    department: "Computer Science",
-    graduationYear: 2027,
-    enrollmentNumber: "2213012",
-  },
-  {
-    id: 4,
-    name: "Nitesh Gupta",
-    email: "nitesh.gupta@email.com",
-    degree: "PhD",
-    department: "Computer Science",
-    graduationYear: 2027,
-    enrollmentNumber: "2213013",
-  },
-  {
-    id: 5,
-    name: "Hit Lathiya",
-    email: "hit.lathiya@email.com",
-    degree: "MBA",
-    department: "Business Administration",
-    graduationYear: 2027,
-    enrollmentNumber: "2213014",
-  },
-  {
-    id: 6,
-    name: "Anjali Verma",
-    email: "anjali.verma@mail.com",
-    degree: "B.Tech",
-    department: "Electrical",
-    graduationYear: 2023,
-    enrollmentNumber: "2213001",
-  },
-  {
-    id: 7,
-    name: "Rohit Singh",
-    email: "rohit.singh@mail.com",
-    degree: "B.Tech",
-    department: "Mechanical",
-    graduationYear: 2022,
-    enrollmentNumber: "2213002",
-  },
-  {
-    id: 8,
-    name: "Sonal Mehta",
-    email: "sonal.mehta@mail.com",
-    degree: "M.Tech",
-    department: "Computer Science",
-    graduationYear: 2021,
-    enrollmentNumber: "2213003",
-  },
-  {
-    id: 9,
-    name: "Vikram Rao",
-    email: "vikram.rao@mail.com",
-    degree: "PhD",
-    department: "Chemical",
-    graduationYear: 2020,
-    enrollmentNumber: "2213004",
-  },
-  {
-    id: 10,
-    name: "Pooja Desai",
-    email: "pooja.desai@mail.com",
-    degree: "MBA",
-    department: "Finance",
-    graduationYear: 2019,
-    enrollmentNumber: "2213005",
-  },
-  {
-    id: 11,
-    name: "Amit Patel",
-    email: "amit.patel@mail.com",
-    degree: "B.Tech",
-    department: "Computer Science",
-    graduationYear: 2024,
-    enrollmentNumber: "2213006",
-  },
-  {
-    id: 12,
-    name: "Meera Joshi",
-    email: "meera.joshi@mail.com",
-    degree: "M.Tech",
-    department: "Electrical",
-    graduationYear: 2025,
-    enrollmentNumber: "2213007",
-  },
-  {
-    id: 13,
-    name: "Karan Malhotra",
-    email: "karan.m@mail.com",
-    degree: "B.Tech",
-    department: "Civil",
-    graduationYear: 2026,
-    enrollmentNumber: "2213008",
-  },
-  {
-    id: 14,
-    name: "Tanya Kapoor",
-    email: "tanya.kapoor@mail.com",
-    degree: "MBA",
-    department: "Marketing",
-    graduationYear: 2023,
-    enrollmentNumber: "2213009",
-  },
-  {
-    id: 15,
-    name: "Rakesh Sharma",
-    email: "rakesh.sharma@mail.com",
-    degree: "B.Tech",
-    department: "Chemical",
-    graduationYear: 2021,
-    enrollmentNumber: "2213010",
-  },
-];
-
 export const donations = [
   { id: 1, alumniName: "Darsh Balar", amount: 150000, date: "10/05/2025" },
   { id: 2, alumniName: "Anjali Verma", amount: 30000, date: "01/08/2025" },
@@ -278,6 +140,13 @@ import {
   FaBars,
   FaTimes,
   FaSpinner,
+  FaPhone,
+  FaEnvelope,
+  FaGraduationCap,
+  FaIdCard,
+  FaLinkedin,
+  FaExternalLinkAlt,
+  FaSignOutAlt,
 } from "react-icons/fa";
 import {
   Pie,
@@ -305,6 +174,9 @@ const AdminDashboard = () => {
   const [file, setFile] = useState(null);
   const fileInputRef = useRef(null);
   const [isUploading, setIsUploading] = useState(false);
+
+  const [studentData, setStudentData] = useState([]);
+  const [loadingAlumni, setLoadingAlumni] = useState(true);
 
   const uploadFile = async () => {
     if (!file) {
@@ -418,15 +290,20 @@ const AdminDashboard = () => {
     { year: 2024, alumni: 220 },
     { year: 2025, alumni: 150 },
   ];
-  const degreeList = ["B.Tech", "M.Tech", "MBA", "PhD"];
-  const departmentList = [
-    "Computer Science",
-    "Electrical",
-    "Mechanical",
-    "Civil",
-    "Chemical",
-  ];
-  const batchList = ["2020", "2021", "2022", "2023", "2024"];
+  const degreeList = useMemo(() => {
+    const courses = [...new Set(studentData.map(member => member.course).filter(Boolean))];
+    return courses.sort();
+  }, [studentData]);
+
+  const departmentList = useMemo(() => {
+    const branches = [...new Set(studentData.map(member => member.branch).filter(Boolean))];
+    return branches.sort();
+  }, [studentData]);
+
+  const batchList = useMemo(() => {
+    const years = [...new Set(studentData.map(member => member.passoutYear).filter(Boolean))];
+    return years.sort().reverse(); // Most recent first
+  }, [studentData]);
   const locationData = [
     { location: "Ahmedabad", alumni: 65 },
     { location: "Delhi", alumni: 30 },
@@ -460,18 +337,39 @@ const AdminDashboard = () => {
   const [selectedAlumni, setSelectedAlumni] = useState(null);
   const [showAlumniModal, setShowAlumniModal] = useState(false);
 
+  useEffect(() => {
+    const fetchStudents  = async () => {
+      try {
+        const token = localStorage.getItem("token"); // admin JWT
+        const response = await axios.get('http://localhost:5000/api/admin/students', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setStudentData(response.data.students || []);
+      } catch (error) {
+        console.error('Error fetching alumni:', error);
+        toast.error('Failed to load alumni data');
+      } finally {
+        setLoadingAlumni(false);
+      }
+    };
+
+    fetchStudents();
+  }, []);
+
   const filteredAlumni = useMemo(() => {
-    return alumni.filter((member) => {
+    return studentData.filter((member) => {
       const inSearch =
-        member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        member.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         member.email.toLowerCase().includes(searchTerm.toLowerCase());
-      const inDegree = degree === "" || member.degree === degree;
+      const inDegree = degree === "" || member.course === degree;
       const inDepartment =
-        department === "" || member.department === department;
-      const inBatch = batch === "" || String(member.graduationYear) === batch;
+        department === "" || member.branch === department;
+      const inBatch = batch === "" || String(member.passoutYear) === batch;
       return inSearch && inDegree && inDepartment && inBatch;
     });
-  }, [searchTerm, degree, department, batch]);
+  }, [searchTerm, degree, department, batch, studentData]);
 
   const filteredEvents = useMemo(() => {
     return events.filter((event) =>
@@ -489,6 +387,14 @@ const AdminDashboard = () => {
     setSearchTerm("");
     setCurrentPage(1);
     setIsSidebarOpen(false); // Close sidebar on mobile after selection
+  };
+
+  const handleLogout = () => {
+    // Clear auth token/session
+    localStorage.removeItem("token");
+    localStorage.removeItem("alumnet-user");
+    // Redirect to login
+    window.location.href = "/login";
   };
 
   const renderMainDashboard = () => {
@@ -634,13 +540,13 @@ const AdminDashboard = () => {
                   <FaUsers className="text-indigo-400" /> Top Alumni
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                  {alumni.slice(0, 3).map((alum) => (
+                  {studentData.slice(0, 3).map((alum) => (
                     <div
                       key={alum.id}
                       className="bg-gradient-to-br from-indigo-50 to-blue-100 rounded-xl p-4 shadow flex flex-col items-center text-center"
                     >
                       <div className="w-16 h-16 rounded-full bg-indigo-200 flex items-center justify-center text-2xl font-bold text-indigo-700 mb-2">
-                        {alum.name.charAt(0)}
+                        {/* {alum.name.charAt(0)} */}
                       </div>
                       <div className="font-semibold text-gray-800">
                         {alum.name}
@@ -804,9 +710,6 @@ const AdminDashboard = () => {
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
                       Date
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
-                      Actions
-                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -832,18 +735,6 @@ const AdminDashboard = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-gray-600">
                         {event.date}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-3">
-                          <button className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-indigo-700 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors">
-                            <FaEye className="w-4 h-4" />
-                            Details
-                          </button>
-                          <button className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-emerald-700 bg-emerald-50 rounded-lg hover:bg-emerald-100 transition-colors">
-                            <FaUsers className="w-4 h-4" />
-                            Attendance
-                          </button>
-                        </div>
-                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -859,13 +750,13 @@ const AdminDashboard = () => {
             )}
           </div>
         );
-      case "Alumni Directory":
+      case "Directory":
         return (
           <div className="p-4 sm:p-6 bg-white min-h-screen">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
               <div>
                 <h1 className="text-2xl md:text-3xl font-extrabold text-gray-800 flex items-center gap-3">
-                  <FaUsers className="text-indigo-600" /> Alumni Directory
+                  <FaUsers className="text-indigo-600" />  Directory
                 </h1>
                 <p className="mt-2 text-gray-600">
                   Browse and manage your alumni network
@@ -950,7 +841,7 @@ const AdminDashboard = () => {
                   onChange={(e) => setDepartment(e.target.value)}
                   className="w-full border rounded px-4 py-2.5"
                 >
-                  <option value="">All Departments</option>
+                  <option value="">All Branches</option>
                   {departmentList.map((dep) => (
                     <option key={dep} value={dep}>
                       {dep}
@@ -971,60 +862,102 @@ const AdminDashboard = () => {
                 </select>
               </div>
             </div>
-            <div className="overflow-x-auto rounded-xl shadow border border-gray-200">
+            {/* Card Grid View for Mobile, Table for Desktop */}
+            <div className="hidden md:block overflow-x-auto rounded-xl shadow border border-gray-200">
               <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
+                <thead className="bg-gradient-to-r from-indigo-50 to-purple-50">
                   <tr>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
-                      Name
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide hidden sm:table-cell">
-                      Email
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide hidden md:table-cell">
-                      Department
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
-                      Actions
-                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-widest">Name</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-widest hidden lg:table-cell">Email</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-widest hidden lg:table-cell">Branch</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-widest">Action</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {paginate(filteredAlumni).map((member) => (
-                    <tr key={member.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
-                        {member.name}
+                  {loadingAlumni ? (
+                    <tr>
+                      <td colSpan="4" className="px-6 py-12 text-center text-gray-500">
+                        <FaSpinner className="inline animate-spin mr-2" />Loading alumni data...
                       </td>
-                      <td className="px-6 py-4 text-gray-700 whitespace-nowrap hidden sm:table-cell">
-                        {member.email}
+                    </tr>
+                  ) : filteredAlumni.length === 0 ? (
+                    <tr>
+                      <td colSpan="4" className="px-6 py-12 text-center text-gray-500">
+                        <FaUsers className="inline mr-2" />No alumni found
                       </td>
-                      <td className="px-6 py-4 text-gray-700 whitespace-nowrap hidden md:table-cell">
-                        {member.department}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
+                    </tr>
+                  ) : (
+                    paginate(filteredAlumni).map((member) => (
+                      <tr key={member.id} className="hover:bg-indigo-50 transition-colors">
+                        <td className="px-6 py-4 font-semibold text-gray-900">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                              {member.full_name?.charAt(0)}
+                            </div>
+                            {member.full_name}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-gray-600 hidden lg:table-cell text-sm">{member.email}</td>
+                        <td className="px-6 py-4 text-gray-600 hidden lg:table-cell text-sm">
+                          <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold">{member.branch}</span>
+                        </td>
+                        <td className="px-6 py-4">
                           <button
-                            className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
-                            onClick={() => {
-                              setSelectedAlumni(member);
-                              setShowAlumniModal(true);
-                            }}
+                            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all shadow-md hover:shadow-lg active:scale-95"
+                            onClick={() => {setSelectedAlumni(member); setShowAlumniModal(true);}}
                           >
                             <FaEye className="w-4 h-4" />
                             View
                           </button>
-                          <button className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-emerald-700 bg-emerald-50 rounded-lg hover:bg-emerald-100 transition-colors">
-                            <FaEdit className="w-4 h-4" />
-                            Edit
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
-            {filteredAlumni.length > ITEMS_PER_PAGE && (
+            {/* Card Grid View for Mobile */}
+            <div className="md:hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {loadingAlumni ? (
+                <div className="col-span-full py-12 text-center text-gray-500">
+                  <FaSpinner className="inline animate-spin mr-2" />Loading...
+                </div>
+              ) : filteredAlumni.length === 0 ? (
+                <div className="col-span-full py-12 text-center text-gray-500">
+                  <FaUsers className="inline mr-2" />No alumni found
+                </div>
+              ) : (
+                paginate(filteredAlumni).map((member) => (
+                  <div key={member.id} className="bg-white rounded-lg shadow border border-gray-200 p-4 hover:shadow-lg hover:border-indigo-200 transition-all">
+                    <div className="flex items-start gap-3 mb-3">
+                      <div className="w-12 h-12 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+                        {member.full_name?.charAt(0)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-gray-900 truncate">{member.full_name}</h3>
+                        <p className="text-xs text-gray-500 truncate">{member.email}</p>
+                      </div>
+                    </div>
+                    <div className="space-y-2 mb-4">
+                      <div className="text-xs">
+                        <span className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded font-semibold">{member.branch}</span>
+                      </div>
+                      <p className="text-xs text-gray-600">
+                        <FaGraduationCap className="inline mr-1" />
+                        {member.course}
+                      </p>
+                    </div>
+                    <button
+                      className="w-full py-2 px-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-semibold rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all"
+                      onClick={() => {setSelectedAlumni(member); setShowAlumniModal(true);}}
+                    >
+                      View Profile
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+            {!loadingAlumni && filteredAlumni.length > ITEMS_PER_PAGE && (
               <Pagination
                 currentPage={currentPage}
                 totalItems={filteredAlumni.length}
@@ -1033,47 +966,128 @@ const AdminDashboard = () => {
               />
             )}
             {showAlumniModal && selectedAlumni && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-                <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full relative">
-                  <button
-                    className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-2xl font-bold"
-                    onClick={() => setShowAlumniModal(false)}
-                    aria-label="Close"
-                  >
-                    &times;
-                  </button>
-                  <h2 className="text-2xl font-bold mb-4 text-indigo-700">
-                    Alumni Profile
-                  </h2>
-                  <div className="space-y-2 text-sm sm:text-base">
-                    <div>
-                      <span className="font-semibold">Name:</span>{" "}
-                      {selectedAlumni.name}
-                    </div>
-                    <div>
-                      <span className="font-semibold">Email:</span>{" "}
-                      {selectedAlumni.email}
-                    </div>
-                    <div>
-                      <span className="font-semibold">Degree:</span>{" "}
-                      {selectedAlumni.degree}
-                    </div>
-                    <div>
-                      <span className="font-semibold">Department:</span>{" "}
-                      {selectedAlumni.department}
-                    </div>
-                    <div>
-                      <span className="font-semibold">Graduation Year:</span>{" "}
-                      {selectedAlumni.graduationYear}
-                    </div>
-                    <div>
-                      <span className="font-semibold">Enrollment No:</span>{" "}
-                      {selectedAlumni.enrollmentNumber}
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 p-4 backdrop-blur-sm">
+                <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+                  {/* Header with Gradient Background */}
+                  <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-8 relative">
+                    <button
+                      className="absolute top-4 right-4 text-white hover:text-gray-200 text-2xl font-bold hover:scale-110 transition-transform"
+                      onClick={() => setShowAlumniModal(false)}
+                      aria-label="Close"
+                    >
+                      &times;
+                    </button>
+                    <div className="flex items-center gap-4">
+                      <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-indigo-600 font-bold text-3xl shadow-lg">
+                        {selectedAlumni.full_name?.charAt(0)}
+                      </div>
+                      <div className="text-white">
+                        <h2 className="text-3xl font-bold">{selectedAlumni.full_name}</h2>
+                        <p className="text-indigo-100 flex items-center gap-2 mt-1">
+                          <FaBriefcase className="w-4 h-4" />
+                          {selectedAlumni.job || selectedAlumni.course || "Alumni"}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                  <div className="mt-6 text-right">
+                  {/* Content Area */}
+                  <div className="p-6 max-h-[60vh] overflow-y-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Contact Information */}
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-bold text-gray-800 border-b-2 border-indigo-200 pb-2 flex items-center gap-2">
+                          <FaPhone className="text-indigo-600" />Contact Info
+                        </h3>
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-3">
+                            <FaEnvelope className="text-indigo-600 flex-shrink-0" />
+                            <div className="min-w-0 flex-1">
+                              <p className="text-xs text-gray-500">Email</p>
+                              <a href={`mailto:${selectedAlumni.email}`} className="text-sm text-indigo-600 hover:underline font-medium truncate">
+                                {selectedAlumni.email}
+                              </a>
+                            </div>
+                          </div>
+                          {selectedAlumni.phone && (
+                            <div className="flex items-center gap-3">
+                              <FaPhone className="text-indigo-600 flex-shrink-0" />
+                              <div className="min-w-0 flex-1">
+                                <p className="text-xs text-gray-500">Phone</p>
+                                <a href={`tel:${selectedAlumni.phone}`} className="text-sm font-medium text-gray-900">
+                                  {selectedAlumni.phone}
+                                </a>
+                              </div>
+                            </div>
+                          )}
+                          {selectedAlumni.linkedinuri && (
+                            <div className="flex items-center gap-3">
+                              <FaLinkedin className="text-indigo-600 flex-shrink-0" />
+                              <div className="min-w-0 flex-1">
+                                <a href={selectedAlumni.linkedinuri} target="_blank" rel="noopener noreferrer" className="text-sm text-indigo-600 hover:underline font-medium flex items-center gap-2">
+                                  LinkedIn <FaExternalLinkAlt className="w-3 h-3" />
+                                </a>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      {/* Academic Information */}
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-bold text-gray-800 border-b-2 border-indigo-200 pb-2 flex items-center gap-2">
+                          <FaGraduationCap className="text-indigo-600" />Academic
+                        </h3>
+                        <div className="space-y-3">
+                          <div>
+                            <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide">Enrollment Number</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <FaIdCard className="text-indigo-600" />
+                              <p className="text-sm font-medium text-gray-900">{selectedAlumni.enrollment_no}</p>
+                            </div>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide">Course</p>
+                            <p className="text-sm font-medium text-gray-900 mt-1">{selectedAlumni.course}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide">Branch</p>
+                            <span className="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-bold mt-1">
+                              {selectedAlumni.branch}
+                            </span>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide">Passout Year</p>
+                            <p className="text-sm font-medium text-gray-900 mt-1">{selectedAlumni.passoutYear}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    {/* Professional Information */}
+                    {(selectedAlumni.company || selectedAlumni.job) && (
+                      <div className="mt-6 space-y-4">
+                        <h3 className="text-lg font-bold text-gray-800 border-b-2 border-indigo-200 pb-2 flex items-center gap-2">
+                          <FaBriefcase className="text-indigo-600" />Professional
+                        </h3>
+                        <div className="bg-indigo-50 rounded-lg p-4 space-y-3">
+                          {selectedAlumni.company && (
+                            <div>
+                              <p className="text-xs text-gray-600 font-semibold uppercase tracking-wide">Current Company</p>
+                              <p className="text-sm font-bold text-indigo-900 mt-1">{selectedAlumni.company}</p>
+                            </div>
+                          )}
+                          {selectedAlumni.job && (
+                            <div>
+                              <p className="text-xs text-gray-600 font-semibold uppercase tracking-wide">Designation</p>
+                              <p className="text-sm font-bold text-indigo-900 mt-1">{selectedAlumni.job}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  {/* footer */}
+                  <div className="border-t border-gray-200 px-6 py-4 bg-gray-50 flex justify-end">
                     <button
-                      className="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all"
+                      className="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all shadow-md hover:shadow-lg active:scale-95"
                       onClick={() => setShowAlumniModal(false)}
                     >
                       Close
@@ -1211,8 +1225,8 @@ const AdminDashboard = () => {
           {[
             { id: "analytics", label: "Analytics", icon: <FaChartPie /> },
             {
-              id: "Alumni Directory",
-              label: "Alumni Directory",
+              id: "Directory",
+              label: "Directory",
               icon: <FaUsers />,
             },
             { id: "events", label: "Events", icon: <FaCalendarAlt /> },
@@ -1231,8 +1245,15 @@ const AdminDashboard = () => {
             </button>
           ))}
         </nav>
-        <footer className="mt-auto py-6">
-          <p className="text-sm text-gray-500">&copy; 2026 Alumni Network</p>
+        <footer className="mt-auto space-y-4 py-6 border-t border-gray-200 pt-4">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 p-3 rounded-lg text-left text-lg font-semibold bg-red-50 text-red-700 hover:bg-red-100 transition-colors duration-200 shadow-sm hover:shadow-md"
+          >
+            <FaSignOutAlt className="text-xl" />
+            <span>Logout</span>
+          </button>
+          <p className="text-xs text-gray-500 text-center">&copy; 2026 Alumni Network</p>
         </footer>
       </aside>
 

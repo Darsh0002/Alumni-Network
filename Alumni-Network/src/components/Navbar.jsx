@@ -23,7 +23,7 @@ export default function Navbar() {
   }, [location]);
 
   const navItems = [
-    { name: "Alumni Directory", path: "/alumni-directory" },
+    { name: "Directory", path: "/directory" },
     { name: "Jobs", path: "/jobs" },
     { name: "Posts", path: "/posts" },
     { name: "Donate", path: "/donate" },

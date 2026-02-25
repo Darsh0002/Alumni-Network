@@ -178,6 +178,23 @@ const AdminDashboard = () => {
   const [studentData, setStudentData] = useState([]);
   const [loadingAlumni, setLoadingAlumni] = useState(true);
 
+  const [departmentData, setDepartmentData] = useState([]);
+  const [graduationTrends, setGraduationTrends] = useState([]);
+  const [locationData, setLocationData] = useState([
+    { location: "Ahmedabad", alumni: 65 },
+    { location: "Delhi", alumni: 30 },
+    { location: "Punjab", alumni: 20 },
+    { location: "Banglore", alumni: 70 },
+    { location: "Other", alumni: 40 },
+  ]);
+  const [donationData, setDonationData] = useState([
+    { name: "2021", funds: 120000 },
+    { name: "2022", funds: 250000 },
+    { name: "2023", funds: 180000 },
+    { name: "2024", funds: 320000 },
+    { name: "2025", funds: 400000 },
+  ]);
+
   const uploadFile = async () => {
     if (!file) {
       toast.error("Please select a file to upload.");
@@ -275,21 +292,17 @@ const AdminDashboard = () => {
     },
   ]);
 
-  const departmentData = [
-    { name: "Computer Engg", value: 280 },
-    { name: "IT", value: 190 },
-    { name: "Electrical", value: 85 },
-    { name: "Mechanical", value: 77 },
-    { name: "Civil", value: 50 },
+  const pieColors = [
+    "#6366F1",
+    "#10B981",
+    "#F59E0B",
+    "#EF4444",
+    "#06B6D4",
+    "#A78BFA",
   ];
-  const graduationTrends = [
-    { year: 2020, alumni: 30 },
-    { year: 2021, alumni: 45 },
-    { year: 2022, alumni: 70 },
-    { year: 2023, alumni: 120 },
-    { year: 2024, alumni: 220 },
-    { year: 2025, alumni: 150 },
-  ];
+  const graduationLineColor = "#06B6D4";
+  const locationBarColor = "#4F46E5";
+  const donationLineColor = "#EF4444";
   const degreeList = useMemo(() => {
     const courses = [...new Set(studentData.map(member => member.course).filter(Boolean))];
     return courses.sort();
@@ -304,31 +317,6 @@ const AdminDashboard = () => {
     const years = [...new Set(studentData.map(member => member.passoutYear).filter(Boolean))];
     return years.sort().reverse(); // Most recent first
   }, [studentData]);
-  const locationData = [
-    { location: "Ahmedabad", alumni: 65 },
-    { location: "Delhi", alumni: 30 },
-    { location: "Punjab", alumni: 20 },
-    { location: "Banglore", alumni: 70 },
-    { location: "Other", alumni: 40 },
-  ];
-  const donationData = [
-    { name: "2021", funds: 120000 },
-    { name: "2022", funds: 250000 },
-    { name: "2023", funds: 180000 },
-    { name: "2024", funds: 320000 },
-    { name: "2025", funds: 400000 },
-  ];
-  const pieColors = [
-    "#6366F1",
-    "#10B981",
-    "#F59E0B",
-    "#EF4444",
-    "#06B6D4",
-    "#A78BFA",
-  ];
-  const graduationLineColor = "#06B6D4";
-  const locationBarColor = "#4F46E5";
-  const donationLineColor = "#EF4444";
 
   const [degree, setDegree] = useState("");
   const [department, setDepartment] = useState("");
@@ -346,7 +334,35 @@ const AdminDashboard = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-        setStudentData(response.data.students || []);
+        const students = response.data.students || [];
+        setStudentData(students);
+
+        // Compute department data
+        const branchCount = {};
+        students.forEach(student => {
+          if (student.branch) {
+            branchCount[student.branch] = (branchCount[student.branch] || 0) + 1;
+          }
+        });
+        const deptData = Object.keys(branchCount).map(branch => ({
+          name: branch,
+          value: branchCount[branch]
+        }));
+        setDepartmentData(deptData);
+
+        // Compute location data based on company
+        const companyCount = {};
+        students.forEach(student => {
+          if (student.company) {
+            companyCount[student.company] = (companyCount[student.company] || 0) + 1;
+          }
+        });
+        const locData = Object.keys(companyCount).slice(0, 5).map(company => ({
+          location: company,
+          alumni: companyCount[company]
+        }));
+        setLocationData(locData);
+
       } catch (error) {
         console.error('Error fetching alumni:', error);
         toast.error('Failed to load alumni data');
@@ -390,11 +406,17 @@ const AdminDashboard = () => {
   };
 
   const handleLogout = () => {
-    // Clear auth token/session
-    localStorage.removeItem("token");
-    localStorage.removeItem("alumnet-user");
-    // Redirect to login
-    window.location.href = "/login";
+    // Show confirmation alert
+    const confirmLogout = window.confirm("Are you sure you want to logout?");
+    
+    if (confirmLogout) {
+      // Clear auth token
+      localStorage.removeItem("token");
+      localStorage.removeItem("alumnet-user");
+      
+      // Redirect to login
+      window.location.href = "/login";
+    }
   };
 
   const renderMainDashboard = () => {
@@ -435,16 +457,16 @@ const AdminDashboard = () => {
                       .toLocaleString()}
                   </span>
                   <span className="text-xs sm:text-sm text-gray-500 text-center">
-                    Total Funds
+                    Total Funds Raised
                   </span>
                 </div>
                 <div className="bg-white rounded-xl shadow-lg p-5 flex flex-col items-center">
                   <FaBriefcase className="text-yellow-500 text-3xl mb-2" />
                   <span className="text-xl sm:text-2xl font-bold text-gray-800">
-                    17
+                    3
                   </span>
                   <span className="text-xs sm:text-sm text-gray-500 text-center">
-                    Jobs Posted
+                    Upcoming Events
                   </span>
                 </div>
               </div>
@@ -535,63 +557,6 @@ const AdminDashboard = () => {
 
             {/* Other Sections */}
             <div className="grid grid-cols-1 gap-6 sm:gap-8">
-              <div className="bg-white rounded-2xl shadow-xl p-6">
-                <h2 className="text-lg font-bold mb-4 text-indigo-700 flex items-center gap-2">
-                  <FaUsers className="text-indigo-400" /> Top Alumni
-                </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                  {studentData.slice(0, 3).map((alum) => (
-                    <div
-                      key={alum.id}
-                      className="bg-gradient-to-br from-indigo-50 to-blue-100 rounded-xl p-4 shadow flex flex-col items-center text-center"
-                    >
-                      <div className="w-16 h-16 rounded-full bg-indigo-200 flex items-center justify-center text-2xl font-bold text-indigo-700 mb-2">
-                        {/* {alum.name.charAt(0)} */}
-                      </div>
-                      <div className="font-semibold text-gray-800">
-                        {alum.name}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {alum.degree}, {alum.department}
-                      </div>
-                      <div className="text-xs text-gray-400">
-                        Batch {alum.graduationYear}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="bg-white rounded-2xl shadow-xl p-6">
-                <h2 className="text-lg font-bold mb-4 text-yellow-700 flex items-center gap-2">
-                  <FaBriefcase className="text-yellow-400" /> Recent Jobs Posted
-                </h2>
-                <ul className="divide-y divide-gray-200">
-                  <li className="py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between">
-                    <span className="font-medium text-gray-800">
-                      Software Engineer at Google
-                    </span>
-                    <span className="text-xs text-gray-500 mt-1 sm:mt-0">
-                      Priya Sharma (CSE '22)
-                    </span>
-                  </li>
-                  <li className="py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between">
-                    <span className="font-medium text-gray-800">
-                      Data Analyst at TCS
-                    </span>
-                    <span className="text-xs text-gray-500 mt-1 sm:mt-0">
-                      Rahul Verma (IT '21)
-                    </span>
-                  </li>
-                  <li className="py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between">
-                    <span className="font-medium text-gray-800">
-                      Mechanical Engineer at L&T
-                    </span>
-                    <span className="text-xs text-gray-500 mt-1 sm:mt-0">
-                      Raj Patel (Mechanical '23)
-                    </span>
-                  </li>
-                </ul>
-              </div>
               <div className="bg-white rounded-2xl shadow-xl p-6">
                 <h2 className="text-lg font-bold mb-4 text-indigo-700 flex items-center gap-2">
                   <FaCalendarAlt className="text-indigo-400" /> Upcoming Events
@@ -1098,6 +1063,113 @@ const AdminDashboard = () => {
             )}
           </div>
         );
+      case "donations":
+        return (
+          <div className="p-4 sm:p-6 bg-gradient-to-br from-emerald-50 to-green-100 min-h-screen">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+              <div>
+                <h1 className="text-2xl md:text-3xl font-extrabold text-emerald-900 flex items-center gap-3">
+                  <FaDonate className="text-emerald-600" /> Donation Management
+                </h1>
+                <p className="mt-2 text-emerald-700">
+                  Track and manage alumni donations and contributions
+                </p>
+              </div>
+            </div>
+
+            {/* Donation Summary Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center">
+                <FaDonate className="text-emerald-500 text-3xl mb-3" />
+                <span className="text-2xl font-bold text-gray-800">
+                  ₹{donationData.reduce((acc, d) => acc + d.funds, 0).toLocaleString()}
+                </span>
+                <span className="text-sm text-gray-500 text-center">
+                  Total Funds Raised
+                </span>
+              </div>
+              <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center">
+                <FaUsers className="text-blue-500 text-3xl mb-3" />
+                <span className="text-2xl font-bold text-gray-800">
+                  {donations.length}
+                </span>
+                <span className="text-sm text-gray-500 text-center">
+                  Total Donors
+                </span>
+              </div>
+              <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center">
+                <FaTrophy className="text-yellow-500 text-3xl mb-3" />
+                <span className="text-2xl font-bold text-gray-800">
+                  ₹{Math.max(...donationData.map(d => d.funds)).toLocaleString()}
+                </span>
+                <span className="text-sm text-gray-500 text-center">
+                  Highest Donation
+                </span>
+              </div>
+            </div>
+
+            {/* Donation Chart */}
+            <div className="bg-white shadow-xl rounded-2xl p-6 mb-8">
+              <h2 className="text-lg font-bold mb-4 text-emerald-700 flex items-center gap-2">
+                <FaDonate className="text-emerald-400" /> Donation Trends Over Time
+              </h2>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={donationData}>
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip formatter={(value) => [`₹${value.toLocaleString()}`, 'Funds']} />
+                  <Legend />
+                  <Line
+                    type="monotone"
+                    dataKey="funds"
+                    stroke="#10B981"
+                    strokeWidth={3}
+                    dot={{ fill: '#10B981', strokeWidth: 2, r: 6 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Recent Donations Table */}
+            <div className="bg-white rounded-2xl shadow-xl p-6">
+              <h2 className="text-lg font-bold mb-4 text-emerald-700 flex items-center gap-2">
+                <FaUsers className="text-emerald-400" /> Recent Donations
+              </h2>
+              <div className="overflow-x-auto rounded-md border border-gray-300">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                        Alumni Name
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                        Amount
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                        Date
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {donations.map((donation) => (
+                      <tr key={donation.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
+                          {donation.alumniName}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-gray-700 font-semibold">
+                          ₹{(Number(donation.amount) || 0).toLocaleString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-gray-600">
+                          {donation.date}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        );
       case "notifications":
         return (
           <div className="p-4 sm:p-6 bg-white min-h-screen">
@@ -1230,6 +1302,7 @@ const AdminDashboard = () => {
               icon: <FaUsers />,
             },
             { id: "events", label: "Events", icon: <FaCalendarAlt /> },
+            { id: "donations", label: "Donations", icon: <FaDonate /> },
             { id: "notifications", label: "Notifications", icon: <FaBell /> },
           ].map(({ id, label, icon }) => (
             <button
